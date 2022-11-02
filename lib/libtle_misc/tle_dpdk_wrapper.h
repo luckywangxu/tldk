@@ -22,7 +22,88 @@ extern "C" {
 
 #include <rte_version.h>
 
-#if RTE_VERSION >= RTE_VERSION_NUM(17, 5, 0, 0)
+#if RTE_VERSION >= RTE_VERSION_NUM(21, 5, 0, 0)
+#include "rte_ring.h"
+
+static inline uint32_t
+_rte_ring_mp_enqueue_bulk(struct rte_ring *r, void * const *obj_table,
+	uint32_t n)
+{
+	uint32_t rc;
+
+	rc = rte_ring_mp_enqueue_bulk(r, (void * const *)obj_table, n, NULL);
+	if (rc == n)
+		return 0;
+	else
+		return -ENOSPC;
+}
+
+static inline uint32_t
+_rte_ring_mp_enqueue_burst(struct rte_ring *r, void * const *obj_table,
+	uint32_t n)
+{
+	return rte_ring_mp_enqueue_burst(r, (void * const *)obj_table, n, NULL);
+}
+
+static inline uint32_t
+_rte_ring_mc_dequeue_burst(struct rte_ring *r, void **obj_table, uint32_t n)
+{
+	return rte_ring_mc_dequeue_burst(r, (void **)obj_table, n, NULL);
+}
+
+static inline uint32_t
+_rte_ring_enqueue_burst(struct rte_ring *r, void * const *obj_table, uint32_t n)
+{
+	return rte_ring_enqueue_burst(r, (void * const *)obj_table, n, NULL);
+}
+
+static inline uint32_t
+_rte_ring_enqueue_bulk(struct rte_ring *r, void * const *obj_table, uint32_t n)
+{
+	uint32_t rc;
+
+	rc = rte_ring_enqueue_bulk(r, (void * const *)obj_table, n, NULL);
+	if (rc == n)
+		return 0;
+	else
+		return -ENOSPC;
+}
+
+static inline uint32_t
+_rte_ring_dequeue_burst(struct rte_ring *r, void **obj_table, uint32_t n)
+{
+	return rte_ring_dequeue_burst(r, (void **)obj_table, n, NULL);
+}
+
+static inline uint32_t
+_rte_ring_get_size(struct rte_ring *r)
+{
+	return r->size;
+}
+
+static inline uint32_t
+_rte_ring_get_mask(struct rte_ring *r)
+{
+	return r->mask;
+}
+
+static inline void **
+_rte_ring_get_data(struct rte_ring *r)
+{
+	return (void **)(&r[1]);
+}
+
+static inline void
+_rte_ring_dequeue_ptrs(struct rte_ring *r, void **obj_table, uint32_t num)
+{
+	uint32_t tail;
+
+	tail = r->cons.tail;
+	__rte_ring_dequeue_elems(r, tail, obj_table, sizeof(void *), num);
+}
+
+#elif RTE_VERSION >= RTE_VERSION_NUM(17, 5, 0, 0)
+#include "rte_ring.h"
 
 static inline uint32_t
 _rte_ring_mp_enqueue_bulk(struct rte_ring *r, void * const *obj_table,
