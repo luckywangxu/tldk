@@ -44,6 +44,7 @@ foreach l:libraries
             include_directories: includes,
             dependencies: static_deps)
     set_variable('static_tle_' + name, static_dep)
+    install_headers(headers)
     
     static_libraries += [static_lib] + static_libraries
 endforeach
